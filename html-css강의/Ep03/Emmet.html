@@ -1,0 +1,48 @@
+<!-- Emmet : !를 누르고 Tab을 누르면 자동 완성 된다. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- 자식 노드 생성 : div>ul>li를 입력하면 하위 형태 태그 자동 완성 된다. -->
+    <div>
+        <ul>
+            <li></li>
+        </ul>
+    </div>
+    <!-- 형제 노드 생성(+) : div>ul+ol+div -->
+    <div>
+        <ul></ul>
+        <ol></ol>
+        <div></div>
+    </div>
+    <!-- 특정 태그 반복 생성(*) div>ul>li*3 -->
+    <div>
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+
+    <!-- 태그 아이디 자동 생성(#) : # 입력하고 아이디 입력 -->
+    <!-- #id -->
+    <div id="id"></div>
+    <!-- div 외 다른 태그 생성하고 싶을 때 : span#id -->
+    <span id="id"></span>
+
+    <!-- 클래스 자동 생성(.) : title.main -->
+    <title class="main"></title>
+
+    <!-- 컨텐츠 자동 생성({}}) : p.container{Hello, HTML!} -->
+    <p class="container">Hello, HTML!</p>
+
+    <!-- 자동 넘버링($) : p.container{item$} -->
+    <p class="container">item1</p>
+    <p class="container">item1</p>
+    <p class="container">item001</p>
+</body>
+</html>
