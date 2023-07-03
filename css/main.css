@@ -1,0 +1,7 @@
+div {
+  width: 200px;
+  height: 200px;
+  background: url("../images/back.jpg");
+  text-decoration: underline;
+  font-size: 20px;   
+}
