@@ -11,34 +11,51 @@ const getData = (url) => {
   return JSON.parse(ajax.response);
 };
 
-const newsFeed = getData(NEWS_URL);
-const ul = document.createElement('ul');
+const newsFeed = () => {
+  const newsFeed = getData(NEWS_URL);
+  const newsList = [];
 
-window.addEventListener('hashchange', function() {
+  newsList.push('<ul>');
+
+  for(let i = 0; i < newsFeed.length; i++) {
+    const news =`
+    <li>
+      <a href="#${newsFeed[i].id}">
+      ${newsFeed[i].title} (${newsFeed[i].comments_count})
+      </a>
+    </li>
+    `;
+    newsList.push(news);
+  }
+
+  newsList.push('</ul>');
+  container.innerHTML = newsList.join('');
+};
+
+const newsDetail = () => {
   const id = location.hash.substring(1);
   const newsContent = getData(CONTENT_URL.replace('@id', id));
 
-  const title = document.createElement('h1');
-  title.innerHTML = newsContent.title;
+  container.innerHTML = `
+    <h1>${newsContent.title}</h1>
 
-  content.appendChild(title);
-})
-
-for(let i = 0; i < newsFeed.length; i++) {
-  const div = document.createElement('div');
-  const li = document.createElement('li');
-  const a = document.createElement('a');
-
-  div.innerHTML =`
-  <li>
-    <a href="#${newsFeed[i].id}">
-    ${newsFeed[i].title} (${newsFeed[i].comments_count})
-    </a>
-  </li>
+    <div>
+      <a href="#">목록으로</a>
+    </div>
   `;
+};
 
-  ul.appendChild(div.children[0]);
-}
+// router
+const router = () => {
+  const routerPath = location.hash;
 
-container.appendChild(ul);
-container.appendChild(content);
+  if (routerPath === '') {
+    newsFeed();
+  } else {
+    newsDetail();
+  }
+};
+
+window.addEventListener('hashchange', router);
+
+router();
