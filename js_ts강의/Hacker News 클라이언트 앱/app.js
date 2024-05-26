@@ -17,8 +17,20 @@ const getData = (url) => {
 const newsFeed = () => {
   const newsFeed = getData(NEWS_URL);
   const newsList = [];
+  let template = `
+    <div class = "container mx-auto p-4">
+      <h1>Hacker News</h1>
+      <ul>
+        {{__news_feed__}}
+      </ul>
+      <div>
+        <a href='#/page/{{__prev_page__}}'>이전 페이지</a>
+        <a href='#/page/{{__next_page__}}'>다음 페이지</a>
+      </div>
+    </div>
+  `;
 
-  newsList.push('<ul>');
+  // newsList.push('<ul>');
 
   for(let i = (store.currentPage - 1)*10 ; i < store.currentPage * 10; i++) {
     const news =`
@@ -31,17 +43,21 @@ const newsFeed = () => {
     newsList.push(news);
   }
 
-  console.log(newsFeed.length / 10);
-  const max_page = newsFeed.length / 10
+  template = template.replace('{{__news_feed__}}', newsList.join(''));
+  template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage - 1 : 1);
+  template = template.replace('{{__next_page__}}', store.currentPage + 1);
 
-  newsList.push('</ul>');
-  newsList.push(`
-    <div>
-      <a href="#/page/${store.currentPage > 1 ? store.currentPage - 1 : 1}">이전 페이지</a>
-      <a href="#/page/${store.currentPage + 1}">다음 페이지</a>
-    </div>
-  `);
-  container.innerHTML = newsList.join('');
+  // console.log(newsFeed.length / 10);
+  // const max_page = newsFeed.length / 10
+
+  // newsList.push('</ul>');
+  // newsList.push(`
+  //   <div>
+  //     <a href="#/page/${store.currentPage > 1 ? store.currentPage - 1 : 1}">이전 페이지</a>
+  //     <a href="#/page/${store.currentPage + 1}">다음 페이지</a>
+  //   </div>
+  // `);
+  container.innerHTML = template;
 };
 
 const newsDetail = () => {
