@@ -1,30 +1,59 @@
-type Store = {
+// type Store = {
+//   currentPage: number;
+//   feeds: NewsFeed[];
+// }
+
+interface Store {
   currentPage: number;
   feeds: NewsFeed[];
 }
 
-type News = {
-  id: number;
-  time_ago: string;
-  title: string;
-  url: string;
-  user: string;
-  content: string;
+// type News = {
+//   id: number;
+//   time_ago: string;
+//   title: string;
+//   url: string;
+//   user: string;
+//   content: string;
+// }
+
+interface News {
+  readonly id: number; // id를 바꿀 수 없도록 지정
+  readonly time_ago: string;
+  readonly title: string;
+  readonly url: string;
+  readonly user: string;
+  readonly content: string;
 }
 
-type NewsFeed = News & {
-  comments_count: number;
-  points: number;
+// type NewsFeed = News & {
+//   comments_count: number;
+//   points: number;
+//   read?: boolean; // ?의 뜻은???
+// }
+
+interface NewsFeed extends News {
+  readonly comments_count: number;
+  readonly points: number;
   read?: boolean; // ?의 뜻은???
 }
 
-type NewsDetail = News & {
-  comments: NewsComment[];
+// type NewsDetail = News & {
+//   comments: NewsComment[];
+// }
+
+interface NewsDetail extends News {
+  readonly comments: NewsComment[];
 }
 
-type NewsComment = News &{
-  comments: NewsComment[];
-  level: number; // 댓글, 대댓글, 대대댓글 확인을 위한 depth
+// type NewsComment = News &{
+//   comments: NewsComment[];
+//   level: number; // 댓글, 대댓글, 대대댓글 확인을 위한 depth
+// }
+
+interface NewsComment extends News {
+  readonly comments: NewsComment[];
+  readonly level: number; // 댓글, 대댓글, 대대댓글 확인을 위한 depth
 }
 
 const container: HTMLElement | null = document.getElementById('root');
