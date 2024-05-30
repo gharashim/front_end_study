@@ -120,6 +120,10 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 })({"app.ts":[function(require,module,exports) {
 "use strict";
 
+// type Store = {
+//   currentPage: number;
+//   feeds: NewsFeed[];
+// }
 var container = document.getElementById('root');
 var ajax = new XMLHttpRequest(); // ajax 란?
 var NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
@@ -128,6 +132,69 @@ var store = {
   currentPage: 1,
   feeds: []
 };
+// class Api {
+//   url: string;
+//   ajax: XMLHttpRequest;
+//   constructor(url: string) {
+//     this.url = url;
+//     this.ajax = new XMLHttpRequest();
+//   }
+//   protected getRequest<AjaxResponse>(): AjaxResponse {
+//     this.ajax.open('GET', this.url, false);
+//     this.ajax.send();
+//     return JSON.parse(this.ajax.response);
+//   }
+// };
+var applyApiMixins = function applyApiMixins(targetClass, baseClasses) {
+  baseClasses.forEach(function (baseClass) {
+    Object.getOwnPropertyNames(baseClass.prototype).forEach(function (name) {
+      var descriptor = Object.getOwnPropertyDescriptor(baseClass.prototype, name);
+      if (descriptor) {
+        Object.defineProperty(targetClass.prototype, name, descriptor);
+      }
+    });
+  });
+};
+var Api = /** @class */function () {
+  function Api() {}
+  Api.prototype.getRequest = function (url) {
+    ajax.open('GET', url, false);
+    ajax.send();
+    return JSON.parse(ajax.response);
+  };
+  return Api;
+}();
+;
+// class NewsFeedApi extends Api { // extends를 활용한 상속
+//   getData(): NewsFeed[] {
+//     return this.getRequest<NewsFeed[]>();
+//   }
+// };
+// class NewsDetailApi extends Api {
+//   getData(): NewsDetail {
+//     return this.getRequest<NewsDetail>();
+//   }
+// };
+var NewsFeedApi = /** @class */function () {
+  function NewsFeedApi() {}
+  NewsFeedApi.prototype.getData = function () {
+    return this.getRequest(NEWS_URL);
+  };
+  return NewsFeedApi;
+}();
+;
+var NewsDetailApi = /** @class */function () {
+  function NewsDetailApi() {}
+  NewsDetailApi.prototype.getData = function (id) {
+    return this.getRequest(CONTENT_URL.replace('@id', id));
+  };
+  return NewsDetailApi;
+}();
+;
+;
+;
+applyApiMixins(NewsFeedApi, [Api]);
+applyApiMixins(NewsDetailApi, [Api]);
 // const getData = <T>(url: string): NewsFeed[] | newsDetail => {
 var getData = function getData(url) {
   ajax.open("GET", url, false);
@@ -149,11 +216,13 @@ var updateView = function updateView(html) {
   }
 };
 var newsFeed = function newsFeed() {
+  var api = new NewsFeedApi();
   var newsFeed = store.feeds;
   var newsList = [];
   var template = "\n    <div class = \"bg-gray-600 min-h-screen\">\n      <div class = \"bg-white text-xl\">\n        <div class = \"mx-auto px -4\">\n          <div class = \"flex justify-between items-center py-6\">\n            <div class=\"flex justify-start\">\n              <h1 class=\"font-extrabold\">Hacker News</h1>\n            </div>\n            <div class=\"items-center justify-end\">\n              <a href='#/page/{{__prev_page__}}'>\n                Previous\n              </a>\n              <a href='#/page/{{__next_page__}}'>\n                Next\n              </a>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"p-4 text-2xl text-gray-700\">\n        {{__news_feed__}}\n      </div>\n    </div>\n  ";
   if (newsFeed.length == 0) {
-    newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
+    // newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
+    newsFeed = store.feeds = makeFeeds(api.getData());
   }
   for (var i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
     var news = "\n    <div class=\"p-6 ".concat(newsFeed[i].read ? 'bg-gray-500' : 'bg-white', "  mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100\">\n      <div class=\"flex\">\n        <div class=\"flex-auto\">\n          <a href=\"#").concat(newsFeed[i].id, "\">").concat(newsFeed[i].title, "</a>\n        </div>\n        <div class=\"text-center text-sm\">\n          <div class=\"w-10 text-white bg-green-300 rounded-lg px-0 py-2\">").concat(newsFeed[i].comments_count, "</div>\n        </div>\n      </div>\n      <div class=\"flex mt-3\">\n        <div class = \"grid grid-cols-3 text-sm text-gray-500\">\n        <div class=\"fas fa-user mr-1\"></i>").concat(newsFeed[i].user, "</div>\n        <div class=\"fas fa-heart mr-1\"></i>").concat(newsFeed[i].points, "</div>\n        <div class=\"far fa-clock mr-1\"></i>").concat(newsFeed[i].time_ago, "</div>\n        </div>\n      </div>\n    </div>\n    ");
@@ -171,7 +240,9 @@ var newsFeed = function newsFeed() {
 };
 var newsDetail = function newsDetail() {
   var id = location.hash.substring(1);
-  var newsContent = getData(CONTENT_URL.replace('@id', id));
+  var api = new NewsDetailApi();
+  // const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id));
+  var newsContent = api.getData(id);
   var template = "\n  <div class=\"bg-gray-600 min-h-screen pb-8\">\n    <div class=\"bg-white text-xl\">\n      <div class=\"mx-auto px-4\">\n        <div class=\"flex justify-between itesm-center py-6\">\n          <div class=\"flex justify-start\">\n            <h1 class=\"font-extrabold\">Hacker News</h1>\n          </div>\n          <div class=\"items-center justify-end\">\n            <a href=\"#/page/".concat(store.currentPage, "\" class=\"text-gray-500\">\n              <i class=\"fa fa-times\"></i>\n            </a>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"h-full border rounded-xl bg-white m-6 p-4\">\n      <h2>").concat(newsContent.title, "</h2>\n      <div class=\"text-gray-400 h-20\">\n        ").concat(newsContent.content, "\n      </div>\n      {{__comments__}}\n    </div>\n  </div>\n  ");
   for (var i = 0; i < store.feeds.length; i++) {
     if (store.feeds[i].id == Number(id)) {
@@ -237,7 +308,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65160" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51893" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
